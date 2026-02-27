@@ -55,10 +55,8 @@ def post_to_x(texts):
         if last_tweet_id:
             payload["reply"] = {"in_reply_to_tweet_id": last_tweet_id}
 
-        # Combine params for signature (OAuth + body)
-        all_params = {**oauth_params, **payload} if isinstance(payload, dict) else oauth_params
-
-        oauth_params["oauth_signature"] = create_oauth_signature("POST", url, all_params, consumer_secret, access_secret)
+        # Twitter API v2 uses JSON body — OAuth signature covers only OAuth params, not body
+        oauth_params["oauth_signature"] = create_oauth_signature("POST", url, oauth_params, consumer_secret, access_secret)
 
         # Build Authorization header
         auth_header = "OAuth " + ', '.join(
@@ -83,5 +81,11 @@ def post_to_x(texts):
     print("✅ All tweets posted successfully!")
 
 if __name__ == "__main__":
-    import os
-    post_to_x(sys.argv[1:])
+    # Read tweets from stdin if no args, otherwise use argv
+    # This avoids shell escaping issues with special chars (bullets, emoji, newlines)
+    if len(sys.argv) > 1:
+        post_to_x(sys.argv[1:])
+    else:
+        # Read newline-delimited tweets from stdin
+        tweets = sys.stdin.read().strip().split("\n---\n")
+        post_to_x([t.strip() for t in tweets if t.strip()])

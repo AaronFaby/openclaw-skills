@@ -39,6 +39,9 @@ def post_to_x(texts):
     last_tweet_id = None
 
     for i, text in enumerate(texts):
+        text = text.strip()
+        if not text:
+            continue
         if len(text) > 280:
             text = text[:277] + "..."
 
@@ -51,14 +54,9 @@ def post_to_x(texts):
             "oauth_version": "1.0"
         }
 
-        payload = {"text": text}
-        if last_tweet_id:
-            payload["reply"] = {"in_reply_to_tweet_id": last_tweet_id}
-
-        # Twitter API v2 uses JSON body — OAuth signature covers only OAuth params, not body
+        # Twitter API v2 uses JSON body — sign OAuth params only, not body
         oauth_params["oauth_signature"] = create_oauth_signature("POST", url, oauth_params, consumer_secret, access_secret)
 
-        # Build Authorization header
         auth_header = "OAuth " + ', '.join(
             f'{k}="{percent_encode(v)}"' for k, v in sorted(oauth_params.items())
         )
@@ -68,24 +66,33 @@ def post_to_x(texts):
             "Content-Type": "application/json"
         }
 
+        payload = {"text": text}
+        if last_tweet_id:
+            payload["reply"] = {"in_reply_to_tweet_id": last_tweet_id}
+
         req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers, method="POST")
         try:
             with urllib.request.urlopen(req) as response:
                 result = json.loads(response.read().decode())
                 last_tweet_id = result['data']['id']
-                print(f"Posted part {i+1}/{len(texts)}: {text[:100]}... ID: {last_tweet_id}")
+                print(f"Posted tweet {i+1}/{len(texts)}: ID {last_tweet_id}")
+        except urllib.error.HTTPError as e:
+            body = e.read().decode()
+            print(f"Error posting tweet {i+1}: HTTP {e.code} — {body}")
+            sys.exit(1)
         except Exception as e:
-            print("Error posting:", e)
+            print(f"Error posting tweet {i+1}: {e}")
             sys.exit(1)
 
-    print("✅ All tweets posted successfully!")
+    print("All tweets posted successfully!")
 
 if __name__ == "__main__":
-    # Read tweets from stdin if no args, otherwise use argv
-    # This avoids shell escaping issues with special chars (bullets, emoji, newlines)
-    if len(sys.argv) > 1:
-        post_to_x(sys.argv[1:])
-    else:
-        # Read newline-delimited tweets from stdin
-        tweets = sys.stdin.read().strip().split("\n---\n")
-        post_to_x([t.strip() for t in tweets if t.strip()])
+    # Always read from stdin using \n---\n as delimiter between tweets.
+    # Avoids ALL shell escaping issues (bullets, emoji, newlines, special chars).
+    # Usage: printf "tweet1\n---\ntweet2" | source ~/.openclaw/.env && python3 x_poster.py
+    stdin_data = sys.stdin.read().strip()
+    if not stdin_data:
+        print("Error: No input on stdin. Use: printf 'tweet1\\n---\\ntweet2' | python3 x_poster.py")
+        sys.exit(1)
+    tweets = [t.strip() for t in stdin_data.split("\n---\n") if t.strip()]
+    post_to_x(tweets)

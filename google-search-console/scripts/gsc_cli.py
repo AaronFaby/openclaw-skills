@@ -76,7 +76,7 @@ def _load_creds(interactive: bool = True) -> Credentials:
     if creds and creds.valid:
         return creds
 
-    if creds and creds.expired and creds.refresh_token:
+    if creds and creds.refresh_token and (not creds.valid or creds.expired):
         creds.refresh(Request())
         _save_token(creds, token_path)
         return creds

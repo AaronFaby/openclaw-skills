@@ -79,11 +79,45 @@ python3 skills/google-search-console/scripts/gsc_cli.py analytics \
 
 Then compare query click/impression deltas in downstream analysis.
 
+## Weekly Report
+
+**Script:** `skills/google-search-console/scripts/gsc_weekly_report.py`
+
+Queries both `sc-domain:macaddress.net` and `sc-domain:subagentic.ai`, generates a formatted SEO report, and sends it via Gmail SMTP.
+
+### Features
+- **HTML email output:** Report is converted from markdown to HTML via `md_to_html()` and sent as a multipart HTML/plain-text email — renders properly in mail clients (no raw markdown in inbox).
+- **AI-generated recommendations:** Uses `claude-haiku-4-5` to review actual data and write 3–5 actionable SEO recommendations. Falls back to hardcoded rule-based logic if the API call fails.
+- **Auth handling:** Script force-resolves `GSC_CLIENT_SECRET_FILE` and `GSC_TOKEN_FILE` using `Path.home()` — shell `$HOME` env vars are intentionally ignored to prevent literal `$HOME` strings from breaking subprocess auth.
+- **Gmail SMTP:** Delegates send to `skills/gmail-imap-ops/scripts/gmail_smtp_send.py` with the `--html` flag for multipart delivery.
+
+### Usage
+
+```bash
+# Dry-run (default) — prints report, no email sent
+python3 skills/google-search-console/scripts/gsc_weekly_report.py
+
+# Send live email
+python3 skills/google-search-console/scripts/gsc_weekly_report.py --send
+
+# Report only — skip email entirely
+python3 skills/google-search-console/scripts/gsc_weekly_report.py --report-only
+```
+
+### Launchd schedule
+- **Plist:** `~/Library/LaunchAgents/com.openclaw.gsc-weekly-report.plist`
+- **Schedule:** Mondays at 6:15 AM PT
+- **First live send:** 2026-03-02 ✅
+
+---
+
 ## Notes
 
 - Use property identifiers exactly as Search Console expects (`sc-domain:example.com` or `https://example.com/`).
 - URL Inspection uses a different API surface (`searchconsole.googleapis.com`) and can be unavailable if not enabled or not authorized.
 - Start with read-only scope. Expand scope only if write operations are needed.
+- `gsc_cli.py` supports `--non-interactive` flag: blocks the browser OAuth flow (safe for cron/headless runs) but still allows silent token refresh via `refresh_token` when a valid cached token exists.
+- `gsc_cli.py` `_load_creds()` was fixed 2026-03-02 to refresh when token is `not valid OR expired` (previously only refreshed when both conditions hit simultaneously).
 
 ## References
 

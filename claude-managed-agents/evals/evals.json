@@ -1,0 +1,29 @@
+{
+  "skill_name": "claude-managed-agents",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a Claude Managed Agents coding agent with the built-in toolset enabled, then create a cloud environment with restricted outbound access to https://api.example.com and pip packages for pandas and numpy. Show me the exact helper commands you would run and explain what each resource is for.",
+      "expected_output": "Uses the claude-managed-agents skill, chooses the Python helper as primary, gives accurate agent and environment commands, and explains the lifecycle roles of the resources clearly.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I already have a managed session that is drifting. Show me how to interrupt it, redirect it toward the auth bug, and then stream events until the session goes idle again. Include the exact commands and explain what event types I should expect.",
+      "expected_output": "Uses the session send and stream workflows, includes interrupt plus redirect, describes the key event types, and does not confuse session status events with message content.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "A Claude Managed Agent is waiting on a custom tool call for get_weather and I need to send the result back. Show me the exact helper command to return a JSON weather result and explain where the custom_tool_use_id comes from.",
+      "expected_output": "Uses the custom tool result workflow correctly, references agent.custom_tool_use and recent session events as the source of the id, and returns a precise helper command.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Give me the ant CLI equivalents for creating a managed agent, creating an environment, creating a session, sending a user message, and streaming the live events. I want native Anthropic CLI commands, not a Python script.",
+      "expected_output": "Recognizes that ant CLI is the requested interface, provides correct ant command patterns for the lifecycle, and does not insist on the Python helper when the user explicitly wants ant.",
+      "files": []
+    }
+  ]
+}

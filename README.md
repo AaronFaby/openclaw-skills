@@ -51,6 +51,7 @@ A collection of custom skills for [OpenClaw](https://github.com/AaronFaby/opencl
 | Skill | Description |
 |---|---|
 | [`replicant`](replicant/) | Identify and remove common AI writing tells. Rewrites text to sound specific, natural, and human without changing the core meaning. |
+| [`gen-z-lingo`](gen-z-lingo/) | Decode, translate, audit, or write Gen Z slang. Covers decode → plain English, plain → Gen Z rewrites, appropriateness audits, and setting-specific guidance (friends, school, workplace, parents). Includes a 2026 slang reference snapshot. No credentials required. |
 
 ---
 

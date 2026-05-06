@@ -3,6 +3,8 @@
 > Provide this file to an agent alongside the `skill-creator` skill when creating a new skill.
 > These principles are drawn from analysis of the SKILL.md format internals and should be
 > applied as a checklist and design lens throughout the skill-creation process.
+>
+> **Source:** [What you're actually writing when you write a SKILL.md](https://internals.laxmena.com/p/what-youre-actually-writing-when) -- Lax Meiyappan, INTERNALS.md #2 (April 30, 2026)
 
 ---
 
